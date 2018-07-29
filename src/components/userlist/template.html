@@ -1,0 +1,158 @@
+<div class="userList">
+    <el-breadcrumb separator-class="el-icon-arrow-right" class="breadcrumb">
+      <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+      <el-breadcrumb-item>活动管理</el-breadcrumb-item>
+      <el-breadcrumb-item>活动列表</el-breadcrumb-item>
+      <el-breadcrumb-item>活动详情</el-breadcrumb-item>
+    </el-breadcrumb>
+    <!-- 搜索框 -->
+    <el-row :gutter="20">
+      <el-col :span="6">
+        <el-input v-model="searchText" placeholder="请输入内容" class="input-with-select">
+           <el-button slot="append" icon="el-icon-search" @click="search"></el-button>
+           <el-button type="success" plain>成功按钮</el-button>
+        </el-input>
+      </el-col>
+      <el-col :span="2">
+          <el-button type="success" plain @click = 'showAddUserdialog'>添加用户</el-button>
+      </el-col>
+    </el-row>
+    <!-- 这里是表格的内容 -->
+    <template>
+      <!-- 这里面的prop的属性值的对应列表中的data的数据的属性值 -->
+        <el-table
+          :data="userList"
+          stripe
+          style="width: 100%">
+          <el-table-column
+            prop="username"
+            label="姓名"
+            width="180">
+          </el-table-column>
+          <el-table-column
+            prop="email"
+            label="邮箱"
+            width="180">
+          </el-table-column>
+          <el-table-column
+            prop="mobile"
+            label="电话">
+          </el-table-column>
+          <el-table-column
+            prop="mg_state"
+            label="用户状态">
+            <template slot-scope="scope">
+                <el-switch
+                  v-model="scope.row.mg_state"
+                  active-color="#409EFF"
+                  inactive-color="#DCDFE6"
+                  @change="changeStatus(scope.row)">
+                </el-switch>
+              </template>
+          </el-table-column>
+          <el-table-column
+             prop="address"
+             label="操作">
+             <!-- 自定义属性要有scope属性 -->
+             <!-- 通过scope.row可以获取到哪一行的数据 -->
+           <template slot-scope="scope">
+            <el-button type="primary" plain size="mini" icon="el-icon-edit" @click = "showEditUserDialog(scope.row)"></el-button>
+            <el-button type="danger" plain size="mini" icon="el-icon-delete" @click= "showDeleteUserDialog(scope.row.id)"></el-button>
+            <el-button type="success" plain size="mini" icon="el-icon-check" @click = "showAssignDialog(scope.row)">分配角色</el-button>
+           </template>
+          </el-table-column>
+        </el-table>
+      </template>
+      <!-- 搜索框 -->
+
+      <!-- 分页的区域 -->
+      <!-- 这边是跟跟数据进行双向数据绑定 -->
+      <el-pagination
+        background
+        layout="prev, pager, next"
+        @current-change ="getCurPageUserList"
+        :current-page.sync ="currentPage"
+        :page-size="pageSize"
+        :total="total">
+      </el-pagination>
+
+      <!-- 添加用户的对话框 -->
+      <el-dialog title="添加用户" :visible.sync="userFormVisible">
+        <!-- label-width="80px" 这边要添加到el-form，对话框里的label-width="120px"
+         是在el-form-item 的每一项上添加的，这样使不对的，没有效果的,而且表单域标签的位置
+         默认是right
+        -->
+        <el-form :model="addUserForm" ref="addUserForm"  :rules="rules" label-width="120px" :label-position="labelPosition">
+          <el-form-item label="用户名" prop='username'>
+            <el-input v-model="addUserForm.username" auto-complete="off"></el-input>
+          </el-form-item>
+          <el-form-item label="密码" prop='password'>
+            <el-input v-model="addUserForm.password" auto-complete="off"></el-input>
+          </el-form-item>
+          <el-form-item label="邮箱" prop='email'>
+            <el-input v-model="addUserForm.email" auto-complete="off" ></el-input>
+          </el-form-item>
+          <el-form-item label="手机"  prop='mobile'>
+            <el-input v-model="addUserForm.mobile" auto-complete="off"></el-input>
+          </el-form-item>
+          
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="cancel">取 消</el-button>
+          <el-button type="primary" @click="addUser">确 定</el-button>
+        </div>
+      </el-dialog>
+
+
+      <!-- 编辑用户的对话框 -->
+      <el-dialog title="编辑用户" :visible.sync="editUserFormVisible">
+          <!-- label-width="80px" 这边要添加到el-form，对话框里的label-width="120px"
+           是在el-form-item 的每一项上添加的，这样使不对的，没有效果的,而且表单域标签的位置
+           默认是right
+          -->
+          <el-form :model="editUserForm" ref="editUserForm"  :rules="editRules" label-width="80px" :label-position="labelPosition"> <el-form-item label="用户名" prop='username'>
+              <el-input v-model="editUserForm.username" auto-complete="off" disabled></el-input>
+            </el-form-item>
+          
+            <el-form-item label="邮箱" prop='email'>
+              <el-input v-model="editUserForm.email" auto-complete="off" ></el-input>
+            </el-form-item>
+            <el-form-item label="手机"  prop='mobile'>
+              <el-input v-model="editUserForm.mobile" auto-complete="off"></el-input>
+            </el-form-item>
+            
+          </el-form>
+          <div slot="footer" class="dialog-footer">
+            <el-button @click="editCancel">取 消</el-button>
+            <el-button type="primary" @click='editUser'>确 定</el-button>
+          </div>
+        </el-dialog>
+
+
+     <!-- 分配角色的对话框 -->
+      <el-dialog title="分配角色" :visible.sync="assignUserFormVisible">
+        <el-form :model="assignUserForm" ref="assignUserForm"  label-width="80px" :label-position="labelPosition"> 
+          <el-form-item label="用户名" prop='username'>
+            <el-input v-model="assignUserForm.username" auto-complete="off" disabled></el-input>
+          </el-form-item>
+
+          <!-- 下拉菜单 -->
+        <el-form-item label="角色列表" prop='username'>
+          <!-- 这边的roleId是与 id相对应的-->
+            <el-select v-model="assignUserForm.roleId" placeholder="请选择">
+              <el-option
+                v-for="item in roleList"
+                :key="item.id"
+                :label="item.roleName"
+                :value="item.id">
+              </el-option>
+            </el-select>
+          </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+          <el-button>取 消</el-button>
+          <el-button type="primary" @click = "getRoleList">确 定</el-button>
+        </div>
+      </el-dialog>
+
+</div>

@@ -1,0 +1,80 @@
+<div class="goods-add">
+  <!-- 进度条 -->
+  <el-steps :active="active" finish-status="success">
+    <el-step title="步骤 1" description="基本信息"></el-step>
+    <el-step title="步骤 2" description="商品图片"></el-step>
+    <el-step title="步骤 3" description="商品内容"></el-step>
+  </el-steps>
+
+  <!-- tab标签页 ,这里可以写死tab-position-->
+  <!-- v-model="activeName"不能写成：v-model="activeName" ，这个是用来激活tab-->
+  <el-tabs 
+  tab-position="left"
+  @tab-click ='changeTab'
+  v-model="activeName"
+  >
+  <!-- 第一个 -->
+    <el-tab-pane label="基本信息" name='basic'>
+      <el-form label-position="right" label-width="80px" :model="getAddGoodList">
+          <el-form-item label="商品名称">
+              <el-input v-model="getAddGoodList.goods_name"></el-input>
+            </el-form-item>
+        <el-form-item label="商品价格">
+          <el-input v-model="getAddGoodList.goods_price"></el-input>
+        </el-form-item>
+        <el-form-item label="商品重量">
+          <el-input v-model="getAddGoodList.goods_weight"></el-input>
+        </el-form-item>
+        <el-form-item label="商品数量">
+          <el-input v-model="getAddGoodList.goods_number"></el-input>
+        </el-form-item>
+        <el-form-item label="商品分类">
+         <!-- 级联菜单 -->
+         <el-cascader
+         :options="getGoodsList"
+         :props ="{
+           label:'cat_name',
+           value:'cat_id'
+         }"
+         v-model="getAddGoodList.goods_cat"
+       >
+       </el-cascader>
+        </el-form-item>
+        <!-- 单选框 -->
+        <el-form-item label="是否促销">
+          <el-radio v-model="getAddGoodList.is_promote" label="1">是</el-radio>
+          <el-radio v-model="getAddGoodList.is_promote" label="2">否</el-radio>          
+        </el-form-item>
+        <!-- 按钮 -->
+        <el-form-item>
+          <el-button type="primary" plain @click="next(1,'pic')">下一步</el-button>         
+        </el-form-item>
+      </el-form>
+    </el-tab-pane>
+   <!-- 第二个 -->
+    <el-tab-pane label="配置管理" name='pic'>
+        <el-upload
+        class="upload-demo"
+        :action="uploadUrl"
+        :before-remove="beforeRemove"
+        :headers="upLoadHeaders"
+        :on-success ="handleSuccess"
+        
+        >
+        <el-button size="small" type="primary">点击上传</el-button>
+        <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
+      </el-upload>
+ 
+        <el-button type="primary" size ='small' class="next" @click = "next(2,'content')">下一步</el-button>         
+     
+    </el-tab-pane>
+    <!-- 第三个 -->
+    <el-tab-pane label="角色管理" name='content'>
+      <!-- 使用富文本编辑器 -->
+      <quill-editor v-model="getAddGoodList.goods_introduce"></quill-editor>
+
+      <el-button type="primary" class="confirm" @click = 'comfirm'>确定</el-button>
+    </el-tab-pane>
+  </el-tabs>
+  
+</div>

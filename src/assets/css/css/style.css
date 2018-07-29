@@ -1,0 +1,16 @@
+.breadcrumb {
+  line-height: 60px;
+  background-color: #D4DAE0;
+  padding-left: 10px;
+  font-size: 16px;
+}
+.row1 {
+  padding: 15px 0px;
+  border-bottom: 1px solid #ccc;
+}
+.row2 {
+  padding: 3px 0px;
+}
+.row3 {
+  padding: 0px 5px;
+}

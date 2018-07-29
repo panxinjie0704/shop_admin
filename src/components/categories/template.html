@@ -1,0 +1,113 @@
+<div class="categories">
+     <!-- 添加分类按钮 -->
+  <el-row>
+   <el-col>
+     <el-button type="success" plain @click="showAddCategoryDialog">添加分类</el-button>
+   </el-col>
+  </el-row>
+  <el-table
+  :data="categoriesList"
+  stripe
+  style="width: 100%"
+  v-loading="loading"
+  >
+  <!-- label:是显示的列的名称 
+       prop:提供的属性，是对应数据中的cat_name
+       tree-key ：区分其他菜单，不添加该key会导致所有菜单同时展开，添加该key只展开该菜单
+       level-key ：设置菜单级别，以缩进形式表示子菜单
+       parent-key ：父级菜单id，不添加该key，则无法收起子菜单
+  -->
+
+  <el-table-tree-column
+  label="分类名称"
+  prop="cat_name"
+  tree-key="cat_id"
+  level-key="cat_level"
+  child-key="children"
+  parent-key="cat_pid"
+  width="280"
+  :indent-size="30">
+  <!-- 这个自定义模板是内容的展示的，引用过来就有-->
+  <template slot-scope="scope">
+    <span>{{ scope.row.cat_name }}</span>
+  </template>
+</el-table-tree-column>
+
+<!-- 这一列不需要了，不然就会有两个第一个列 -->
+  <!-- <el-table-column
+    prop="cat_name"
+    label="分类名称"
+    width="280">
+  </el-table-column> -->
+  <el-table-column
+    prop="cat_deleted"
+    label="是否有效"
+    width="180">
+    <!-- 自定义模板 -->
+    <template slot-scope='scope'>
+    {{scope.row.cat_deleted + '' }}
+    </template>
+  </el-table-column>
+  <el-table-column
+    prop="cat_level"
+    label="菜单级别"
+    width="180">
+  </el-table-column>
+  <el-table-column
+  prop="address"
+  label="操作">
+  <!-- 自定义模板 -->
+  <template slot-scope='scope'>
+    <el-button type="primary" plain icon="el-icon-edit" size="mini"></el-button>
+    <el-button type="danger" plain icon="el-icon-delete" size="mini"></el-button>
+  </template>
+</el-table-column>
+</el-table>
+
+<!-- 分页功能 -->
+
+<el-pagination
+  background
+  layout="prev, pager, next"
+  :total="total"
+  :page-size="10"
+  @current-change = "changePage"
+  >
+ 
+</el-pagination>
+
+<!-- 添加分类的对话框 -->
+
+<el-dialog
+  title="添加分类"
+  :visible.sync="AddCategoryDialog"
+  width="30%"
+ >
+ <!--是个表格 -->
+ <el-form :label-position="labelPosition" label-width="80px" :model="addCategoryForm">
+    <el-form-item label="分类名称">
+      <el-input v-model="addCategoryForm.cat_name" prop="cat_name"></el-input>
+    </el-form-item>
+    <el-form-item label="父级名称" prop = "cat_pid">
+     <!-- 添加级联选择器 -->
+      <el-cascader
+      v-model="addCategoryForm.cat_pid"
+      :options="cartList"
+      :props = "{
+        label:'cat_name',
+        value:'cat_id'
+      }"
+      change-on-select
+      >
+    </el-cascader>
+    </el-form-item>
+    
+  </el-form>
+  <span slot="footer" class="dialog-footer">
+    <el-button @click="dialogVisible = false">取 消</el-button>
+    <el-button type="primary" @click="addCartList">确 定</el-button>
+  </span>
+</el-dialog>
+
+
+</div>
